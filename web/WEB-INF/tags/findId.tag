@@ -14,8 +14,8 @@
                 type : "POST",
                 async: true,
                 data : {
-                    name : $("#name").val(),
-                    phoneNumber : $("#phoneNumberId").val()
+                    customer_name : $("#name").val(),
+                    phone_number : $("#phoneNumberId").val()
                 },
                 success : function(result) {
                     alert(result);

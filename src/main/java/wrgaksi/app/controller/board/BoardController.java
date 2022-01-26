@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import wrgaksi.app.model.board.BoardVO;
 
 @Controller
-@SessionAttributes("user")
 public class BoardController {
     @Autowired
     BoardService boardService;

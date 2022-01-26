@@ -116,11 +116,10 @@
                     $.ajax({
                         url: "idCheck.me",
                         type: "post",
-                        async: true,
-                        data: {id: id},
                         dataType: 'json',
+                        data: {"customer_id": id},
                         success: function (result) {
-                            if (result == "0") {
+                            if (result == '1') {
                                 $("#checkId").html('사용할 수 없는 아이디입니다.');
                                 $("#checkId").attr('color', 'red');
                                 idChecked = false; // id체크 true
@@ -130,8 +129,8 @@
                                 idChecked = true;
                             }
                         },
-                        error: function () {
-                            alert("서버요청실패");
+                        error: function (request, error) {
+                            console.log(request.status+" "+request.responseText+" "+error);
                         }
                     })
                     setAble();

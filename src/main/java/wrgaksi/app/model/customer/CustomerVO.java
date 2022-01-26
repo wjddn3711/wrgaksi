@@ -8,6 +8,29 @@ public class CustomerVO {
     private String ZIP_code;
     private String detailed_address;
 
+    @Override
+    public String toString() {
+        return "CustomerVO{" +
+                "customer_id='" + customer_id + '\'' +
+                ", customer_password='" + customer_password + '\'' +
+                ", customer_name='" + customer_name + '\'' +
+                ", phone_number='" + phone_number + '\'' +
+                ", ZIP_code='" + ZIP_code + '\'' +
+                ", detailed_address='" + detailed_address + '\'' +
+                ", temp_password='" + temp_password + '\'' +
+                '}';
+    }
+
+    public void setTemp_password(String temp_password) {
+        this.temp_password = temp_password;
+    }
+
+    public String getTemp_password() {
+        return temp_password;
+    }
+
+    private String temp_password;
+
     public String getCustomer_id() {
         return customer_id;
     }
@@ -45,10 +68,4 @@ public class CustomerVO {
         this.detailed_address = detailed_address;
     }
 
-    @Override
-    public String toString() {
-        return "CustomerVO [customer_number="  + ", customer_id=" + customer_id
-                + ", customer_password=" + customer_password + ", customer_name=" + customer_name + ", phone_number="
-                + phone_number + ", ZIP_code=" + ZIP_code + ", detailed_address=" + detailed_address + "]";
-    }
 }

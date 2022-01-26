@@ -9,13 +9,14 @@
 <script>
     $(function(){
         $("#findPwBtn").click(function(){
+            console.log($("#id").val()+$("#phoneNumberPw").val());
             $.ajax({
                 url : "findPw.me",
                 type : "POST",
                 async: true,
                 data : {
-                    id : $("#id").val(),
-                    phoneNumber : $("#phoneNumberPw").val()
+                    customer_id : $("#id").val(),
+                    phone_number : $("#phoneNumberPw").val()
                 },
                 success : function(result) {
                     alert(result);
