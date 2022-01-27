@@ -9,7 +9,7 @@
             </tr>
             <tr>
                 <td>이름</td>
-                <td><input name="customer_name" type="text" placeholder="${customer_name}" required></td>
+                <td><input name="customer_name" type="text" placeholder="${userData.customer_name}" required></td>
                 <td></td>
             </tr>
             <tr>
@@ -29,7 +29,7 @@
             </tr>
             <tr>
                 <td rowspan="2">주소</td>
-                <td><input name="ZIP_CODE"  type="text" id="sample4_postcode" placeholder="${userData.ZIP_code}" required></td>
+                <td><input name="ZIP_code"  type="text" id="sample4_postcode" placeholder="${userData.ZIP_code}" required></td>
                 <td><input id="input" type="button" style="border-radius: 10px;" onclick="sample4_execDaumPostcode()" value="우편번호 찾기"><mytag:postcode /></td>
             </tr>
             <tr>

@@ -5,7 +5,6 @@ import net.nurigo.java_sdk.exceptions.CoolsmsException;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import wrgaksi.app.controller.component.CoolSms;
 import wrgaksi.app.controller.customer.CustomerService;
 import wrgaksi.app.model.customer.CustomerDAO;
 import wrgaksi.app.model.customer.CustomerVO;

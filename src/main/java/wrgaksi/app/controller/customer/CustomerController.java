@@ -5,10 +5,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
+import wrgaksi.app.controller.subscription.SubscriptionService;
 import wrgaksi.app.model.customer.CustomerVO;
+import wrgaksi.app.model.subscription.Order_subscriptionVO;
+import wrgaksi.app.model.subscription.Product_setVO;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @Controller
 @SessionAttributes(value = "customer_id")
@@ -16,6 +17,9 @@ public class CustomerController {
 
     @Autowired
     CustomerService customerService;
+
+    @Autowired
+    SubscriptionService subscriptionService; // 마이페이지에서 주문 정보를 받기위해
 
     @RequestMapping("/login.me")
     public String login(CustomerVO vo, Model model){
@@ -56,12 +60,17 @@ public class CustomerController {
         return ""+idCheck+"";
     }
 
-    public String updateUser(CustomerVO vo){
+    @RequestMapping("/updateUser.me")
+    public String updateUser(CustomerVO vo, Model model){
+        vo.setCustomer_id((String) model.getAttribute("customer_id"));
+        System.out.println(vo);
         customerService.update(vo);
         return "mypage.me";
     }
 
-    public String deleteUser(@ModelAttribute("customer_id") CustomerVO vo){
+    @RequestMapping("/deleteUser.me")
+    public String deleteUser(CustomerVO vo, Model model){
+        vo.setCustomer_id((String) model.getAttribute("customer_id"));
         customerService.delete(vo);
         return "main.do";
     }
@@ -108,6 +117,24 @@ public class CustomerController {
             customerService.updateTemp(vo);
             return "회원님의 임시 비밀번호가 설정되었습니다! \n로그인 후 마이페이지를 통해 변경 해주세요";
         }
+    }
+
+    @RequestMapping("/mypage.me")
+    public String mypage(CustomerVO vo, Model model, Order_subscriptionVO ovo, Product_setVO productSet){
+        String customer_id = (String) model.getAttribute("customer_id");
+        vo.setCustomer_id(customer_id);
+        System.out.println("mypage 수행중");
+        model.addAttribute("userData", customerService.selectOne(vo)); // 유저 데이터를 받아 저장
+        ovo.setCustomer_id(customer_id);
+        Order_subscriptionVO order = subscriptionService.selectOne(ovo);
+        System.out.println(order);
+        if(order!=null){
+            productSet = subscriptionService.selectProductSet(order);
+            System.out.println(productSet);
+            model.addAttribute("order", order);
+            model.addAttribute("order_set",productSet);
+        }
+        return "mypage.jsp";
     }
 
 
