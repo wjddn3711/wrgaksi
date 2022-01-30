@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="mytag"%>
 
 
@@ -34,7 +35,7 @@
     <section class="body">
         <h3>장바구니</h3>
         <hr>
-        <h5>${customer_name}님의 장바구니입니다.</h5>
+        <h5>${customer_id}님의 장바구니입니다.</h5>
 
         <!-- 장바구니 -->
         <section class="section section-lg bg-default">
@@ -100,16 +101,16 @@
                                     </c:when>
                                     <c:otherwise> <!-- 단품을 선택했다면 -->
                                         <c:forEach var="v" items="${cart.singleProducts}">
-                        <tr>
-                                    <form action="updateCart.pd" method="post">
-                                        <input type="hidden" name="product_number" value="${v.productVO.product_number}">
-                                            <td>${v.productVO.product_name}</td>
-                                            <td>${v.product_price}</td>
-                                            <td><input type="number" name="product_count" min="1" max="99" value="${v.product_count}">
-                                                <input type="submit" value="변경하기">
-                                            <td><a href="deleteCart.pd?product_number=${v.productVO.product_number}">X</a></td>
-                                    </form>
-                        </tr>
+                                            <tr>
+                                                <form action="updateCart.pd" method="post">
+                                                    <input type="hidden" name="product_number" value="${v.productVO.product_number}">
+                                                        <td>${v.productVO.product_name}</td>
+                                                        <td>${v.product_price}</td>
+                                                        <td><input type="number" name="product_count" min="1" max="99" value="${v.product_count}">
+                                                            <input type="submit" value="변경하기">
+                                                        <td><a href="deleteCart.pd?product_number=${v.productVO.product_number}">X</a></td>
+                                                </form>
+                                            </tr>
                                         </c:forEach>
                                     </c:otherwise>
                                 </c:choose>

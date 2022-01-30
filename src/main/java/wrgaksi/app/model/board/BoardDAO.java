@@ -55,9 +55,10 @@ public class BoardDAO {
         return (ArrayList<BoardVO>) jdbcTemplate.query(sql_selectFav, new BoardRowMapper());
     }
 
-    public ArrayList<BoardVO> selectMine(BoardVO vo) {
+    public ArrayList<BoardVO> selectMine(BoardVO vo) throws Exception{
         System.out.println("[게시판]selectMine 수행중");
-        return (ArrayList<BoardVO>) jdbcTemplate.query(sql_selectMine, new BoardRowMapper());
+        Object[] obj = {vo.getCustomer_id()};
+        return (ArrayList<BoardVO>) jdbcTemplate.query(sql_selectMine, obj,new BoardRowMapper());
     }
 
     public void insert(BoardVO vo) {

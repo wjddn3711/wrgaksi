@@ -36,7 +36,11 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public ArrayList<BoardVO> selectMine(BoardVO vo) {
-        return boardDAO.selectMine(vo);
+        try {
+            return boardDAO.selectMine(vo);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

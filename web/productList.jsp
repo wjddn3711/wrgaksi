@@ -46,16 +46,16 @@
                         <tr>
                             <th style="padding: 5px;">
                                 <div>
-                                    &nbsp;보기 :&nbsp; <a href="productFilter.pd?filter=main">메인</a>&nbsp;|&nbsp;
-                                    <a href="productFilter.pd?filter=side">반찬</a>&nbsp;|&nbsp; <a
-                                        href="productFilter.pd?filter=soup">&nbsp;국&nbsp;</a>
+                                    &nbsp;보기 :&nbsp; <a href="productFilter.pd?product_type=메인">메인</a>&nbsp;|&nbsp;
+                                    <a href="productFilter.pd?product_type=반찬">반찬</a>&nbsp;|&nbsp; <a
+                                        href="productFilter.pd?product_type=국">&nbsp;국&nbsp;</a>
                                 </div>
                             </th>
                         </tr>
                         <tr>
                             <td>
                                 <form method="post" action="productSearch.pd">
-                                    <input type="text" name="keyword"><input id="input"
+                                    <input type="text" name="searchContent"><input id="input"
                                                                              type="submit" value="검색">
                                 </form>
                             </td>

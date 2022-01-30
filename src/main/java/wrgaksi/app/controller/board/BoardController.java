@@ -3,12 +3,12 @@ package wrgaksi.app.controller.board;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import wrgaksi.app.model.board.BoardVO;
 
 @Controller
+@SessionAttributes("customer_id")
 public class BoardController {
     @Autowired
     BoardService boardService;
@@ -30,9 +30,11 @@ public class BoardController {
 
     // 게시판 카테고리 별
     @RequestMapping("/categoryBoard.do")
-    public String boardCategory(@ModelAttribute("user") BoardVO vo, Model model){
+    public String boardCategory(BoardVO vo, Model model){
         String category = vo.getCategory();
         if(category.equals("mine")){
+            System.out.println((String) model.getAttribute("customer_id"));
+            vo.setCustomer_id((String) model.getAttribute("customer_id"));
             model.addAttribute("boardList", boardService.selectMine(vo));
         }
         else if(category.equals("recent")){
@@ -52,7 +54,7 @@ public class BoardController {
     }
 
     // 게시판 검색
-    @RequestMapping("/searchBoard")
+    @RequestMapping("/searchBoard.do")
     public String boardSearch(BoardVO vo, Model model){
         // vo 에 자동으로 키워드 세팅
         model.addAttribute("boardList", boardService.selectSearch(vo));
@@ -60,20 +62,21 @@ public class BoardController {
     }
 
     // 게시판 등록
-    @RequestMapping("/insertBoard")
-    public String boardInsert(BoardVO vo){
+    @RequestMapping("/insertBoard.do")
+    public String boardInsert(BoardVO vo, Model model){
+        vo.setCustomer_id((String) model.getAttribute("customer_id"));
         boardService.insert(vo);
         return "boardDone.jsp";
     }
 
     // 게시판 삭제
-    @RequestMapping("/deleteBoard")
+    @RequestMapping("/boardDelete.do")
     public String boardDelete(BoardVO vo){
         boardService.delete(vo);
         return "boardList.do";
     }
 
-    @RequestMapping("/boardDetail")
+    @RequestMapping("/boardDetail.do")
     public String boardDetail(BoardVO vo, Model model){
         model.addAttribute("boardDetail", boardService.selectOne(vo));
         return "boardOne.jsp";
