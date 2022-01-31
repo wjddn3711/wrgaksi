@@ -69,9 +69,11 @@ public class CustomerController {
     }
 
     @RequestMapping("/deleteUser.me")
-    public String deleteUser(CustomerVO vo, Model model){
+    public String deleteUser(CustomerVO vo, Model model, SessionStatus status){
         vo.setCustomer_id((String) model.getAttribute("customer_id"));
         customerService.delete(vo);
+        model.addAttribute("customer_id", null);
+        status.setComplete(); // 세션에 저장된 아이디 데이터 지우기
         return "main.do";
     }
 
@@ -121,6 +123,7 @@ public class CustomerController {
 
     @RequestMapping("/mypage.me")
     public String mypage(CustomerVO vo, Model model, Order_subscriptionVO ovo, Product_setVO productSet){
+        System.out.println(model.getAttribute("customer_id"));
         String customer_id = (String) model.getAttribute("customer_id");
         vo.setCustomer_id(customer_id);
         System.out.println("mypage 수행중");

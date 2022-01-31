@@ -1,13 +1,17 @@
 package wrgaksi.app.controller.product;
 
-import org.dom4j.rule.Mode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.context.request.WebRequest;
+import wrgaksi.app.controller.customer.CustomerService;
+import wrgaksi.app.controller.order.OrderService;
 import wrgaksi.app.controller.subscription.SubscriptionService;
+import wrgaksi.app.model.customer.CustomerVO;
+import wrgaksi.app.model.order.OrderSet;
+import wrgaksi.app.model.order.Order_detailVO;
+import wrgaksi.app.model.order.Order_singleVO;
 import wrgaksi.app.model.product.ProductCart;
 import wrgaksi.app.model.product.ProductSingleCart;
 import wrgaksi.app.model.product.ProductVO;
@@ -19,13 +23,20 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 
 @Controller
-@SessionAttributes({"cart","totalPrice","customer_id"})
+@SessionAttributes("customer_id")
 public class ProductController {
     @Autowired
     ProductService productService;
 
     @Autowired
     SubscriptionService subscriptionService;
+
+    @Autowired
+    OrderService orderService;
+
+    @Autowired
+    CustomerService customerService;
+
 
     @RequestMapping("/subscription.pd")
     public String subscribe(Order_subscriptionVO order_subscriptionVO, Model model, HttpSession session){
@@ -46,7 +57,7 @@ public class ProductController {
     }
 
     @RequestMapping("/productAdd.pd")
-    public String addProduct(ProductSingleCart singleCart, ProductVO vo, Model model){
+    public String addProduct(ProductSingleCart singleCart, ProductVO vo, Model model, HttpSession session){
         System.out.println(model.getAttribute("customer_id"));
         if(model.getAttribute("customer_id")==null){
             return "login.jsp";
@@ -65,9 +76,8 @@ public class ProductController {
         boolean isContain = false;
 
         // 기존에 장바구니 정보가 있다면
-        if(model.getAttribute("cart")!=null){
-            cart = (ProductCart) model.getAttribute("cart");
-            System.out.println(cart);
+        if(session.getAttribute("cart")!=null){
+            cart = (ProductCart) session.getAttribute("cart");
             singleProducts = cart.getSingleProducts();
             // 만약 장바구니에 해당 상품이 있을때는 수량 + 해줌
             for (ProductSingleCart singleProduct : singleProducts) {
@@ -91,8 +101,8 @@ public class ProductController {
         for (ProductSingleCart singleProduct : singleProducts) {
             totalPrice+=singleProduct.getProduct_price();
         }
-        model.addAttribute("cart", cart);
-        model.addAttribute("totalPrice", totalPrice);
+        session.setAttribute("cart", cart);
+        session.setAttribute("totalPrice", totalPrice);
         return "cart.jsp";
         // 장바구니 페이지로 이동
     }
@@ -134,9 +144,9 @@ public class ProductController {
     }
 
     @RequestMapping("/updateCart.pd")
-    public String updateCart(Model model, ProductSingleCart singleCart, ProductVO vo){
+    public String updateCart(Model model, ProductSingleCart singleCart, ProductVO vo, HttpSession session){
 
-        ProductCart cart = (ProductCart) model.getAttribute("cart"); // 세션에서 카트 정보를 갖고 온다
+        ProductCart cart = (ProductCart) session.getAttribute("cart"); // 세션에서 카트 정보를 갖고 온다
         ArrayList<ProductSingleCart> singleProducts = cart.getSingleProducts();
         System.out.println(vo.getProduct_number());
         int totalPrice = 0;
@@ -146,9 +156,9 @@ public class ProductController {
             }
             totalPrice+=singleProduct.getProduct_price();
         }
-        model.addAttribute("totalPrice",totalPrice);// 전체 금액을 세션에 저장
+        session.setAttribute("totalPrice",totalPrice);// 전체 금액을 세션에 저장
         cart.setSingleProducts(singleProducts); // 추가 한것으로 업데이트
-        model.addAttribute("cart",cart);
+        session.setAttribute("cart",cart);
         return "cart.jsp";
     }
 
@@ -156,15 +166,14 @@ public class ProductController {
     public String deleteCart(HttpServletRequest request, Model model, HttpSession session){
         // product_number 를 뷰에서 받아와 해당 상품을 지운뒤 다시 장바구니로
         if(request.getParameter("undoSubscribe")!=null){
-            session.invalidate(); // 세션에는 구독정보만 저장되어있기에 invalidate 로 flush
-//            model.addAttribute("product_set",null);
-//            model.addAttribute("product_set_price", null);
+            session.removeAttribute("product_set");
+            session.removeAttribute("product_set_price");
             return "cart.jsp";
         }
         int product_number = Integer.parseInt(request.getParameter("product_number"));
-        ProductCart cart = (ProductCart) model.getAttribute("cart");
+        ProductCart cart = (ProductCart) session.getAttribute("cart");
         ArrayList<ProductSingleCart> singleProducts = cart.getSingleProducts();
-        int totalPrice = (int) model.getAttribute("totalPrice");
+        int totalPrice = (int) session.getAttribute("totalPrice");
         for (int i = 0; i < singleProducts.size(); i++) {
             if(singleProducts.get(i).getProductVO().getProduct_number()==product_number){
                 totalPrice -= singleProducts.get(i).getProduct_price(); // 해당 상품 가격을 뺀다
@@ -173,8 +182,62 @@ public class ProductController {
             }
         }
         cart.setSingleProducts(singleProducts); // 추가 한것으로 업데이트
-        model.addAttribute("cart",cart);
-        model.addAttribute("totalPrice",totalPrice);
+        session.setAttribute("cart",cart);
+        session.setAttribute("totalPrice",totalPrice);
         return "cart.jsp";
+    }
+
+    @RequestMapping("/payment.pd")
+    public String payment (Model model, OrderSet orderSet, Order_singleVO order_singleVO, Order_subscriptionVO order_subscriptionVO,HttpSession session){
+        String customer_id = (String) model.getAttribute("customer_id");
+        order_singleVO.setCustomer_id(customer_id);
+        orderSet.setSingle(order_singleVO);// id 넣기
+
+        // 상품 관련 장바구니
+        if(model.getAttribute("cart")!=null){
+            ProductCart cart = (ProductCart) session.getAttribute("cart");
+            ArrayList<ProductSingleCart> products = cart.getSingleProducts();
+            ArrayList<Order_detailVO> orderDetail = new ArrayList<>();
+            for (ProductSingleCart product : products) {
+                Order_detailVO od = new Order_detailVO();
+                od.setProduct_number(product.getProductVO().getProduct_number());
+                od.setProduct_count(product.getProduct_count());
+                orderDetail.add(od);
+                session.removeAttribute("cart");
+                session.removeAttribute("totalPrice"); //세션에 장바구니관련 정보 없애기
+            }
+            orderSet.setDetails(orderDetail);
+            orderService.insert(orderSet);
+            System.out.println("주문 정보 저장완료");
+        }
+
+        // 구독관련 장바구니
+        if(session.getAttribute("product_set")!=null){ // 구독 주문을 하였다면
+            Product_setVO productSetVO = (Product_setVO) session.getAttribute("product_set");
+            order_subscriptionVO.setCustomer_id(customer_id);
+            if(subscriptionService.selectIsExist(order_subscriptionVO)){ // 만약 해당 기간내에 주문정보가 존재한다면
+                session.removeAttribute("product_set");
+                session.removeAttribute("product_set_price"); // 장바구니에서 구독정보를 삭제해준다
+                // 문서에 글을 쓸 준비 !
+                return "orderFail.jsp";
+            }
+            order_subscriptionVO.setSoup_check(productSetVO.getSoup_check());
+            order_subscriptionVO.setProduct_set_number(productSetVO.getProduct_set_number());
+            subscriptionService.insert(order_subscriptionVO);
+            System.out.println("구독 주분 정보 저장완료");
+            session.removeAttribute("product_set");
+            session.removeAttribute("product_set_price"); //세션에 저장된 구독관련 정보 없애기
+        }
+        return "orderDone.jsp";
+    }
+
+    @RequestMapping("/checkout.pd")
+    public String checkout(Model model, CustomerVO customerVO){
+        customerVO.setCustomer_id((String) model.getAttribute("customer_id"));
+        CustomerVO userData = customerService.selectOne(customerVO); // 유저 데이터를 받아옴
+        System.out.println(userData);
+        // 유저 데이터 저장
+        model.addAttribute("userData", userData);
+        return "payment.jsp";
     }
 }
